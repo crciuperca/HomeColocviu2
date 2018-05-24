@@ -12,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -35,15 +36,21 @@ import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class CommunicationThread extends Thread {
 
+    private MyServerThread serverThread;
     private Socket socket;
     private EditText serverTextEditText;
     private String link = "https://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     private Spinner dropdown;
+    private String city;
+    private String informationType;
+    String retStr;
 
-    public CommunicationThread(Socket socket, EditText serverTextEditText, Spinner dropdown) {
+    public CommunicationThread(Socket socket, EditText serverTextEditText, Spinner dropdown, MyServerThread serverThread) {
         this.socket = socket;
         this.serverTextEditText = serverTextEditText;
         this.dropdown = dropdown;
+        this.serverThread = serverThread;
+
     }
 
     @Override
@@ -51,8 +58,18 @@ public class CommunicationThread extends Thread {
         try {
             Log.v(Constants.TAG, "Connection opened with " + socket.getInetAddress() + ":" + socket.getLocalPort());
             PrintWriter printWriter = Utilities.getWriter(socket);
-           // printWriter.println(serverTextEditText.getText().toString());
-            printWriter.println(getInfo());
+            BufferedReader bufferedReader = Utilities.getReader(socket);
+
+
+            city = bufferedReader.readLine();
+            informationType = bufferedReader.readLine();
+
+
+
+
+            String msg = getInfo();
+ //           printWriter.println(retStr);
+            //printWriter.println(getInfo());
             socket.close();
             Log.v(Constants.TAG, "Conenction closed");
         } catch (IOException ioException) {
@@ -64,10 +81,12 @@ public class CommunicationThread extends Thread {
     }
 
     public String getInfo() {
-        String retStr = "";
-        if (!((String)dropdown.getSelectedItem()).equals("POST")) {
+        this.retStr = "";
+        String humidity = "";
+        String temperature = "";
+        if (!(informationType).equals("POST")) {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpGet httpGetXKCD = new HttpGet(link + serverTextEditText.getText().toString());
+            HttpGet httpGetXKCD = new HttpGet(link + city);//serverTextEditText.getText().toString());
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
             String pageSourceCode = null;
             Document document = new Document("Page empty");
@@ -94,10 +113,24 @@ public class CommunicationThread extends Thread {
                 for (Element el : elements) {
                     if (el.toString().contains("heatindex")) {
 
-                        retStr += "Humidity: " + el.toString().split("\"humidity\"")[1].substring(1,3) + "%\n";
-                        retStr += "Temperature: " + el.toString().split("\"temperature\"")[1].substring(1, 3) + "F\n";
+                        humidity = "Humidity: " + el.toString().split("\"humidity\"")[1].substring(1,3) + "%\n";
+                        temperature = "Temperature: " + el.toString().split("\"temperature\"")[1].substring(1, 3) + "F\n";
+
+                        retStr += humidity;
+                        retStr += temperature;
+
+                        //serverThread.setData(city, new WeatherForecastInformation(humidity, temperature));
                         break;
                     }
+                }
+                PrintWriter printWriter = null;
+                try {
+                    printWriter = Utilities.getWriter(socket);
+                    printWriter.println(humidity);
+                    printWriter.println(temperature);
+                    printWriter.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
                 /*  EXAMPLE JSON PARSE
@@ -181,9 +214,9 @@ public class CommunicationThread extends Thread {
                     // do something with the response
 
                     //Toast.makeText(MainActivity.context, httpPostEntity.toString(), Toast.LENGTH_LONG).show();
-
+                    retStr = httpPostEntity.getContent().toString();
                     Log.i(Constants.TAG, EntityUtils.toString(httpPostEntity));
-                    return httpPostEntity.getContent().toString();
+                    return retStr;
                 }
             } catch (Exception exception) {
                 Log.e(Constants.TAG, exception.getMessage());

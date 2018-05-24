@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,13 +22,14 @@ public class MainActivity extends AppCompatActivity {
     private Button b2;
     private EditText msg;
     private EditText portServer;
-    private EditText t2;
-    private EditText t3;
+    private EditText address;
+    private EditText portClient;
     private EditText city;
     private TextView tv;
     private MyServerThread serverThread;
     private Spinner dropdown;
     public static Context context;
+    private ClientThread clientThread;
 
     private Listener1 listener1 = new Listener1();
     private class Listener1 implements View.OnClickListener {
@@ -52,16 +54,24 @@ public class MainActivity extends AppCompatActivity {
     private class Listener2 implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-//            MyFtpServer ftpServerCommunicationAsyncTask = new MyFtpServer(tv);
-//            ftpServerCommunicationAsyncTask.execute(portServer.getText().toString());
+/*
             ClientAsyncTask clientAsyncTask = new ClientAsyncTask(tv);
-            clientAsyncTask.execute(t2.getText().toString(), t3.getText().toString());
+            clientAsyncTask.execute(address.getText().toString(), portClient.getText().toString());
             try {
                 TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             serverThread.stopServer();
+*/
+            if (serverThread == null || !serverThread.isAlive()) {
+                Toast.makeText(getApplicationContext(), "[MAIN ACTIVITY] There is no server to connect to!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            clientThread = new ClientThread(address.getText().toString(), Integer.parseInt(portClient.getText().toString()), city.getText().toString(), (String)dropdown.getSelectedItem(), tv);
+            clientThread.start();
+
         }
     }
 
@@ -100,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
 
         portServer = (EditText)findViewById(R.id.editText1);
         msg = (EditText)findViewById(R.id.editText);
-        t2 = (EditText)findViewById(R.id.editText2);
-        t3 = (EditText)findViewById(R.id.editText3);
+        address = (EditText)findViewById(R.id.editText2);
+        portClient = (EditText)findViewById(R.id.editText3);
         city = (EditText)findViewById(R.id.editText4);
         tv = (TextView) findViewById(R.id.textView);
         dropdown = (Spinner)findViewById(R.id.dropdown);
@@ -120,10 +130,11 @@ public class MainActivity extends AppCompatActivity {
         b2.setOnClickListener(listener2);
 
         portServer.setText("2017");
-        t2.setText("127.0.0.1");
-        t3.setText("2017");
+        address.setText("127.0.0.1");
+        portClient.setText("2017");
         msg.setText("Server Start");
         city.setText("Bucharest");
+        tv.setText("");
         //portServer.addTextChangedListener(serverTextContentWatcher);
     }
 }

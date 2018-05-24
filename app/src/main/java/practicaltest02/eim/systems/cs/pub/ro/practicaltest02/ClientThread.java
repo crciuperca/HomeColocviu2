@@ -46,11 +46,11 @@ public class ClientThread extends Thread {
             printWriter.flush();
             String weatherInformation;
             while ((weatherInformation = bufferedReader.readLine()) != null) {
-                final String finalizedWeateherInformation = weatherInformation;
+                final String finalizedWeateherInformation = weatherInformation + "\n";
                 weatherForecastTextView.post(new Runnable() {
                    @Override
                     public void run() {
-                       weatherForecastTextView.setText(finalizedWeateherInformation);
+                       weatherForecastTextView.setText(weatherForecastTextView .getText().toString() + finalizedWeateherInformation);
                    }
                 });
             }

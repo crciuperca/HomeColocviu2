@@ -7,6 +7,7 @@ import android.widget.Spinner;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class MyServerThread extends Thread {
 
@@ -19,6 +20,8 @@ public class MyServerThread extends Thread {
     private int port;
 
     private Spinner dropdown;
+
+    private HashMap<String, WeatherForecastInformation> data = null;
 
     public MyServerThread(int port, EditText serverTextEditText, Spinner dropdown) {
         this.port = port;
@@ -52,7 +55,7 @@ public class MyServerThread extends Thread {
             while (isRunning) {
                 Socket socket = serverSocket.accept();
                 if (socket != null) {
-                    CommunicationThread communicationThread = new CommunicationThread(socket, serverTextEditText, dropdown);
+                    CommunicationThread communicationThread = new CommunicationThread(socket, serverTextEditText, dropdown, this);
                     communicationThread.start();
                 }
             }
@@ -63,4 +66,13 @@ public class MyServerThread extends Thread {
             }
         }
     }
+
+    public synchronized void setData(String city, WeatherForecastInformation weatherForecastInformation) {
+        this.data.put(city, weatherForecastInformation);
+    }
+
+    public synchronized HashMap<String, WeatherForecastInformation> getData() {
+        return data;
+    }
+
 }
