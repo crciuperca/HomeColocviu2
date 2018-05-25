@@ -138,3 +138,41 @@ public class MainActivity extends AppCompatActivity {
         //portServer.addTextChangedListener(serverTextContentWatcher);
     }
 }
+
+/*
+    //               Persist data
+
+     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("clicks")) {
+                clicks = savedInstanceState.getLong("clicks");
+            }
+        }
+     }
+     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putLong("clicks", clicks);
+
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.containsKey("clicks")) {
+            clicks = savedInstanceState.getLong("clicks");
+        }
+
+    }
+ */
+
+
+/*
+git init
+git add *
+git commit -m "msg"
+git remote add PROJECT https://github.com/crciuperca/REPONAME
+git push -u PROJECT master
+ */
